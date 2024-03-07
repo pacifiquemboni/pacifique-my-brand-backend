@@ -1,0 +1,205 @@
+const Blog = require("../models/blogschema.js");
+
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
+const multer = require("multer");
+
+const Storage = multer.diskStorage({
+  destination: "uploads",
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({
+  storage: Storage,
+}).single("blogImage");
+
+class BlogController {
+  static async getAllBlogs(req, res) {
+    const blogs = await Blog.find();
+    // if (blogs.length === 0) {
+    //   return res.status(200).json({
+    //     status: "success",
+    //     message: "There is no blogs posted",
+    //   });
+    // }
+    return res.status(200).json({
+      status: "Posted blogs",
+      data: blogs,
+    });
+  }
+  // post a blog
+  // static async postOneBlog(req, res) {
+  //   try {
+  //     const { title, author, intro, body } = req.body;
+  //     const blogexist = await Blog.findOne({ title: title });
+  //     if (blogexist) {
+  //       return res.status(400).json({
+  //         message: "Blog already Posted",
+  //       });
+  //     }
+  //     const postblog = await Blog.create({
+  //       title,
+  //       author,
+  //       intro,
+  //       body,
+  //     });
+  //     return res.status(200).json({
+  //       status: "success",
+  //       data: postblog,
+  //     });
+  //   } catch (error) {
+  //     return res.status(500).json({
+  //       status: "error",
+  //       message: error.message,
+  //     });
+  //   }
+  // }
+  static async postOneBlog(req, res) {
+    try {
+      upload(req, res, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          const { title, author, intro, body } = req.body;
+          if (!title || !intro || !body) {
+            return res.status(400).json({
+              error: "Title, Introduction, and Body are required",
+            });
+          }
+          if (!req.file) {
+            return res.status(400).json({
+              error: "Image is required",
+            });
+          }
+          const postblog = new Blog({
+            title: title,
+            author: author,
+            intro: intro,
+            body: body,
+
+            image: {
+              data: req.file.filename,
+              contentType: "image/png",
+            },
+          });
+          postblog.save();
+          return res.status(200).json({
+            message: "Portfolio created successfully",
+            data: postblog,
+          });
+        }
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+  //add comment
+  static async commentOnBlog(req, res) {
+    try {
+      const { names, comment } = req.body;
+      const blogId = req.params.id;
+      if(!blogId){
+        return res.status(400).json({
+          error: "blogId does not exist",
+        });
+      }
+      const blogObjectId = new ObjectId(blogId);
+      // console.log("blogId:", blogId);
+
+      const postComment = {
+        names,
+        timeadded: new Date(),
+        comment,
+      };
+
+      const updateBlog = await Blog.findOneAndUpdate(
+        { _id: blogObjectId },
+        {
+          $push: {
+            comments: postComment,
+          },
+        },
+        { new: true }
+      );
+      return res.status(200).json({
+        status: "success",
+        data: updateBlog,
+      });
+    } catch (error) {
+      console.error(error); // Log the error for debugging purposes
+      return res.status(500).json({
+        message: "Internal Server Error",
+      });
+    }
+  }
+
+  //get single blog
+  static async getOneBlog(req, res) {
+    try {
+      const singleBlog = await Blog.findOne({ _id: req.params.id });
+      if (singleBlog) {
+        return res.status(200).json({
+          status: "blog exist",
+          data: singleBlog,
+        });
+      }
+      return res.status(200).json({
+        message: "blog with that id is deleted",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "provided ID doen't exist!",
+      });
+    }
+  }
+  //updating single blog
+  static async updateOneBlog(req, res) {
+    try {
+      const singleBlog = await Blog.findOne({ _id: req.params.id });
+      const { title, author, intro, body } = req.body;
+      if (title) {
+        singleBlog.title = title;
+      }
+      if (author) {
+        singleBlog.author = author;
+      }
+      if (intro) {
+        singleBlog.intro = intro;
+      }
+      if (body) {
+        singleBlog.body = body;
+      }
+      const updateBlog = await Blog.findOneAndUpdate(
+        { _id: req.params.id },
+        singleBlog,
+        { new: true }
+      );
+      return res.status(200).json({
+        status: "blog updated successfully",
+        data: updateBlog,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "update is not successfull!",
+      });
+    }
+  }
+  // deleting a blog
+  static async removeBlog(req, res) {
+    try {
+      await Blog.deleteOne({ _id: req.params.id });
+      return res.status(200).json({
+        status: "blog deleted successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "delete is not successfull!",
+      });
+    }
+  }
+}
+
+module.exports = BlogController;

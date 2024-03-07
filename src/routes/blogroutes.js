@@ -9,7 +9,7 @@ router.use(express.json());
 // get all blogs
 router.get("/blogs", BlogController.getAllBlogs);
 //post a blog
-router.post("/blog", BlogController.postOneBlog);
+router.post("/blog",authMiddleware.isAuthenticated,authMiddleware.checkRole, BlogController.postOneBlog);
 
 // get single blog
 

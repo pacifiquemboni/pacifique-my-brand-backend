@@ -26,6 +26,6 @@ signupRouter.post("/login", signController.loginUser)
 //send email
 signupRouter.post("/sub", signController.subscribe)
 //get all subscribers
-signupRouter.get("/subscribers", signController.getAllsubscribers)
+signupRouter.get("/subscribers",authMiddleware.isAuthenticated,authMiddleware.checkRole, signController.getAllsubscribers)
 
 module.exports = signupRouter;

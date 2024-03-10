@@ -1,9 +1,13 @@
 const jwt = require("jsonwebtoken")
+const dotenv = require("dotenv")
+
+
+dotenv.config();
 
 class JWT{
   static generateJwt(data, exp='1d'){
-    const secretKey = "a2b3c4d5e6f7g8h9i0j";
-    return jwt.sign(data,secretKey,{expiresIn: exp} )
+    
+    return jwt.sign(data,process.env.JWT_SECRET_KEY,{expiresIn: exp} )
   }
 }
 module.exports= JWT

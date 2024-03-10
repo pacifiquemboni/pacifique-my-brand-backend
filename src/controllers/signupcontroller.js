@@ -3,6 +3,9 @@ const User = require("../models/signupschema.js");
 const Subs = require("../models/subscribeschema.js");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 class userSignupController {
   static async getAllSignUpUsers(req, res) {
@@ -18,6 +21,7 @@ class userSignupController {
       data: signedUser,
     });
   }
+  //register user
   //register user
   static async registerUser(req, res) {
     try {
@@ -44,7 +48,7 @@ class userSignupController {
         errors =
           "Enter a valid password it contains atleast one capital letter, one small letter, one special char and one number";
       }
-      if (!password.match(confpass)) {
+      if (password !== confpass) {
         errors = "Password doesnt match!";
       }
       if (errors) {
@@ -59,6 +63,7 @@ class userSignupController {
         names,
         email,
         password: hashPassword,
+        confpass: hashPassword,
         role,
       });
       return res.status(200).json({
@@ -92,6 +97,14 @@ class userSignupController {
     }
   }
   //update user
+  /**
+   * Update information about a user based on their ID.
+   * @function
+   * @async
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} - JSON response
+   */
   static async updateUser(req, res) {
     try {
       const singleUser = await User.findOne({ _id: req.params.id });
@@ -99,20 +112,12 @@ class userSignupController {
       if (names) {
         singleUser.names = names;
       }
-      if (email) {
-        singleUser.email = email;
-      }
+
       if (password) {
         const hashPassword = bcrypt.hashSync(password, 10);
         singleUser.password = hashPassword;
       }
-      if (confpass) {
-        const hashPassword = bcrypt.hashSync(confpass, 10);
-        singleUser.confpass = hashPassword;
-      }
-      if (role) {
-        singleUser.role = role;
-      }
+
       if (updatedAt) {
         singleUser.updatedAt = Date.now();
       }
@@ -133,6 +138,14 @@ class userSignupController {
     }
   }
   //deleting a user
+  /**
+   * Delete a user based on their ID.
+   * @function
+   * @async
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} - JSON response
+   */
   static async deleteUser(req, res) {
     try {
       await User.deleteOne({ _id: req.params.id });
@@ -181,6 +194,14 @@ class userSignupController {
     }
   }
   //subscribe
+  /**
+   * Subscribe a user by providing their names and email.
+   * @function
+   * @async
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} - JSON response
+   */
   static async subscribe(req, res) {
     try {
       const { names, email } = req.body;
@@ -198,7 +219,7 @@ class userSignupController {
         service: "gmail",
         auth: {
           user: "pacifiquemboni@gmail.com",
-          pass: "didg hylt hivg zuzb",
+          pass: process.env.EMAIL_PASS,
         },
       });
       const mailOptions = {
@@ -226,6 +247,15 @@ class userSignupController {
       });
     }
   }
+
+  /**
+   * Retrieve information about all subscribers.
+   * @function
+   * @async
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Object} - JSON response
+   */
   static async getAllsubscribers(req, res) {
     // const{names,email,password,confpass,role} = req.body;
     const subscribeUser = await Subs.find();

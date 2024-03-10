@@ -11,7 +11,7 @@ describe("POST a message /api/sendmessage", () => {
     expect(response.statusCode).toBe(400)
   });
   test("should have a 400 status and valid error response: Enter valid email", async () => {
-    const response = await request(app).post("/api/sendmessage").send({
+    const response = await request(app).post("/messages/sendmessage").send({
     
       email:'pazzo',
       
@@ -20,7 +20,7 @@ describe("POST a message /api/sendmessage", () => {
   });
 
   test("should have a 400 status and valid response: message is require", async () => {
-    const response = await request(app).post("/api/sendmessage").send({
+    const response = await request(app).post("/messages/sendmessage").send({
       names:'pazzo',
       email:'pazzo'
     });

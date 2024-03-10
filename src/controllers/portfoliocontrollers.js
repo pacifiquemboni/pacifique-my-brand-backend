@@ -77,12 +77,12 @@ class portfolioController {
       });
     }
   }
-  // deleting a blog
+  // deleting a project
   static async removeProj(req, res) {
     try {
       await Portfolio.deleteOne({ _id: req.params.id });
       return res.status(200).json({
-        status: "blog deleted successfully",
+        status: "project deleted successfully",
       });
     } catch (error) {
       return res.status(500).json({

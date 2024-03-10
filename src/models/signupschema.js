@@ -22,14 +22,9 @@ const signupSchema = mongoose.Schema({
     type: String,
     default: 'user'
   },
-  createdAt: {
-    type: Date,
-    default: Date.now()
-},
-updatedAt: {
-    type: Date,
-    default: Date.now()
-},
+
 })
 
-module.exports = mongoose.model("User",signupSchema)
+const User = mongoose.model('User', signupSchema)
+
+module.exports = User;

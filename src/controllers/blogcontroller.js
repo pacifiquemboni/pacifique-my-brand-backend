@@ -17,44 +17,18 @@ const upload = multer({
 class BlogController {
   static async getAllBlogs(req, res) {
     const blogs = await Blog.find();
-    // if (blogs.length === 0) {
-    //   return res.status(200).json({
-    //     status: "success",
-    //     message: "There is no blogs posted",
-    //   });
-    // }
+    if (blogs.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "There is no blogs posted",
+      });
+    }
     return res.status(200).json({
       status: "Posted blogs",
       data: blogs,
     });
   }
-  // post a blog
-  // static async postOneBlog(req, res) {
-  //   try {
-  //     const { title, author, intro, body } = req.body;
-  //     const blogexist = await Blog.findOne({ title: title });
-  //     if (blogexist) {
-  //       return res.status(400).json({
-  //         message: "Blog already Posted",
-  //       });
-  //     }
-  //     const postblog = await Blog.create({
-  //       title,
-  //       author,
-  //       intro,
-  //       body,
-  //     });
-  //     return res.status(200).json({
-  //       status: "success",
-  //       data: postblog,
-  //     });
-  //   } catch (error) {
-  //     return res.status(500).json({
-  //       status: "error",
-  //       message: error.message,
-  //     });
-  //   }
-  // }
+ 
   static async postOneBlog(req, res) {
     try {
       upload(req, res, (err) => {
@@ -72,9 +46,10 @@ class BlogController {
               error: "Image is required",
             });
           }
+          const loggedInUserName = req.user ? req.user.name : "Anonymous";
           const postblog = new Blog({
             title: title,
-            author: author,
+            author: loggedInUserName,
             intro: intro,
             body: body,
 
@@ -85,7 +60,7 @@ class BlogController {
           });
           postblog.save();
           return res.status(200).json({
-            message: "Portfolio created successfully",
+            message: "Blog created successfully",
             data: postblog,
           });
         }
@@ -101,16 +76,16 @@ class BlogController {
     try {
       const { names, comment } = req.body;
       const blogId = req.params.id;
-      if(!blogId){
+      if (!blogId) {
         return res.status(400).json({
           error: "blogId does not exist",
         });
       }
       const blogObjectId = new ObjectId(blogId);
       // console.log("blogId:", blogId);
-
+      const loggedInUserName = req.user ? req.user.name : "Anonymous";
       const postComment = {
-        names,
+        names: loggedInUserName,
         timeadded: new Date(),
         comment,
       };
@@ -163,9 +138,6 @@ class BlogController {
       if (title) {
         singleBlog.title = title;
       }
-      if (author) {
-        singleBlog.author = author;
-      }
       if (intro) {
         singleBlog.intro = intro;
       }
@@ -183,7 +155,7 @@ class BlogController {
       });
     } catch (error) {
       return res.status(500).json({
-        message: "update is not successfull!",
+        message: error.message,
       });
     }
   }

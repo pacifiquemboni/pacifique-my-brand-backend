@@ -6,18 +6,24 @@ const signupRouter = require("./routes/usersignuproutes.js");
 const messageRouter = require("./routes/messageroutes.js");
 const portfolioRouter = require("./routes/portfolioroutes.js");
 const multer = require("multer");
-dotenv.config();
+// const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerSpecs = require('./swagger.js');
+const swaggerUi = require("swagger-ui-express");
 const app = express();
+dotenv.config();
 connectDB;
 
-app.use("/api", routes);
-app.use("/api", signupRouter);
-app.use("/api", messageRouter);
-app.use("/api", portfolioRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+
+app.use("/", routes);//for blogs
+app.use("/", signupRouter);
+app.use("/", messageRouter);
+app.use("/", portfolioRouter);
+
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to my API");
 });
-
 app.get("*", (req, res) => {
   res.status(404).send("Page is not found");
 });
@@ -27,8 +33,6 @@ const hostname = "127.0.0.1";
 module.exports = app.listen(port, () => {
   console.log(`Server has started! on http://${hostname}:${port}`);
 });
-
-
 
 // module.exports = function(port) {
 //   return app.listen(port);

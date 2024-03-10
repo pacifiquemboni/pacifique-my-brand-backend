@@ -1,0 +1,72 @@
+const request = require("supertest");
+const app = require("../index");
+const authMiddleware = require("../middleware/authmiddleware.js");
+
+// Mock the authMiddleware module
+jest.mock("../middleware/authMiddleware");
+
+describe("POST a blog /api/blog", () => {
+  beforeEach(() => {
+    // Reset the mock between tests
+    jest.resetAllMocks();
+  });
+
+  test("should have a 400 status and a valid error response: Title, Introduction, Body, and image are required", async () => {
+    // Mock isAuthenticated to simulate an unauthenticated user
+    authMiddleware.isAuthenticated.mockImplementation((req, res, next) => {
+      res.status(401).json({ message: "Unauthorized: Token not provided" });
+    });
+
+    const response = await request(app)
+      .post("/blogs/createblog")
+      .send({})
+      .set("Authorization", "Bearer INVALID_ACCESS_TOKEN");
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Unauthorized: Token not provided");
+  });
+
+  test("Should have a 400 status and a valid error response: Image is required", async () => {
+    // Mock isAuthenticated and checkRole to simulate an authenticated user without the 'admin' role
+    authMiddleware.isAuthenticated.mockImplementation((req, res, next) => {
+      req.user = { role: "user" };
+      next();
+    });
+    authMiddleware.checkRole.mockImplementation((req, res, next) => {
+      res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+    });
+
+    const response = await request(app)
+      .post("/blogs/createblog")
+      .send({
+        title: "hello",
+        author: "paccy",
+        intro: "this is introduction",
+        body: "this is the body of my blog",
+      })
+      .set("Authorization", "Bearer VALID_ACCESS_TOKEN");
+
+    expect(response.statusCode).toBe(403);
+    expect(response.body.message).toBe("Forbidden: Insufficient permissions");
+  });
+
+  test("Should have a 401 status: Unauthorized access for an invalid token", async () => {
+    // Mock isAuthenticated to simulate an unauthenticated user
+    authMiddleware.isAuthenticated.mockImplementation((req, res, next) => {
+      res.status(401).json({ message: "Unauthorized: Token not provided" });
+    });
+
+    const response = await request(app)
+      .post("/blogs/createblog")
+      .send({
+        title: "hello",
+        author: "paccy",
+        intro: "this is introduction",
+        body: "this is the body of my blog",
+      })
+      .set("Authorization", "Bearer INVALID_ACCESS_TOKEN");
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Unauthorized: Token not provided");
+  });
+});

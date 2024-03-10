@@ -1,7 +1,7 @@
 const JWT = require("../helper/jwt.js");
 const User = require("../models/signupschema.js");
 const Subs = require("../models/subscribeschema.js");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 

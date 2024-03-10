@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors');
 const dotenv = require("dotenv");
 const connectDB = require("./database/connection.js");
 const routes = require("./routes/blogroutes.js");
@@ -15,7 +16,7 @@ connectDB;
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
-
+app.use(cors());
 app.use("/", routes);//for blogs
 app.use("/", signupRouter);
 app.use("/", messageRouter);

@@ -6,7 +6,7 @@ dotenv.config();
 //mongodb://localhost:27017/nodedb
 const connectDB = mongoose 
           .connect(process.env.MONGO_URI)
-          .then(() => console.log("Database Connected Successfully"))
+          .then((result) => console.log("Database Connected Successfully"))
           .catch((err) => console.log('error happened'+err))
 
 

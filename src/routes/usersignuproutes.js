@@ -46,8 +46,8 @@ signupRouter.use(express.json());
 
 signupRouter.get(
   "/users",
-  authMiddleware.isAuthenticated,
-  authMiddleware.checkRole,
+  // authMiddleware.isAuthenticated,
+  // authMiddleware.checkRole,
   signController.getAllSignUpUsers
 );
 //register a user
@@ -115,7 +115,7 @@ signupRouter.post("/user", signController.registerUser);
  * tags:
  *   - name: "Users"
  *     description: "Endpoints for managing user-related information"
- * 
+ *
  * /users/{id}:
  *   get:
  *     summary: Get a single user by ID
@@ -169,7 +169,7 @@ signupRouter.get(
  * tags:
  *   - name: "Users"
  *     description: "Endpoints for managing user-related information"
- * 
+ *
  * /users/{id}:
  *   patch:
  *     summary: Update a user by ID
@@ -239,7 +239,11 @@ signupRouter.get(
  *             example:
  *               error: "Internal server error."
  */
-signupRouter.patch("/users/:id",authMiddleware.isAuthenticated, signController.updateUser);
+signupRouter.patch(
+  "/users/:id",
+  authMiddleware.isAuthenticated,
+  signController.updateUser
+);
 
 //deleting user
 /**
@@ -247,7 +251,7 @@ signupRouter.patch("/users/:id",authMiddleware.isAuthenticated, signController.u
  * tags:
  *   - name: "Users"
  *     description: "Endpoints for managing user-related information"
- * 
+ *
  * /users/{id}:
  *   delete:
  *     summary: Delete a user by ID
@@ -353,7 +357,7 @@ signupRouter.post("/login", signController.loginUser);
  * tags:
  *   - name: "Subscription"
  *     description: "Endpoints for user subscription"
- * 
+ *
  * /subscribe:
  *   post:
  *     summary: Subscribe a user
@@ -405,7 +409,7 @@ signupRouter.post("/subscribe", signController.subscribe);
  * tags:
  *   - name: "Subscription"
  *     description: "Endpoints for user subscription"
- * 
+ *
  * /subscribers:
  *   get:
  *     summary: Get all subscribers

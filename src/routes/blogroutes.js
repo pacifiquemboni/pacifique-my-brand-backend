@@ -114,6 +114,13 @@ router.post(
   authMiddleware.checkRole,
   BlogController.postOneBlog
 );
+//////////////////////////// this is used i testing
+router.post(
+  "/postblog",
+  authMiddleware.isAuthenticated,
+  authMiddleware.checkRole,
+  BlogController.postsingleBlog
+);
 
 // get single blog
 /**

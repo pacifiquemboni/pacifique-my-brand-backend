@@ -164,6 +164,7 @@ class userSignupController {
       const { email, password } = req.body;
 
       const userExist = await User.findOne({ email });
+      console.log(userExist); // Log the user object
       if (!userExist) {
         return res.status(404).json({
           message: "Account does not exist",
@@ -178,14 +179,17 @@ class userSignupController {
           message: "Incorrect credentials",
         });
       }
+      // Log the userExist and token
+    console.log("User Exist:", userExist);
       const token = JWT.generateJwt({
         userId: userExist._id,
         role: userExist.role,
         name: userExist.names,
       });
+      console.log("Generated Token:", token);
       return res.status(200).json({
-        message: "Logged in successfully",
-        token,
+        token: token,
+        role: userExist.role
       });
     } catch (error) {
       return res.status(500).json({
@@ -222,14 +226,14 @@ class userSignupController {
           pass: process.env.EMAIL_PASS,
         },
       });
+      let msg =
+            "Thank you for subscribing! 🌟 We're thrilled to have you on board. Stay tuned for exciting updates and exclusive content. Your support means the world to us! 🚀✨";
+          let body = msg + "Thanks Again: " + names;
       const mailOptions = {
         from: "pacifiquemboni@gmail.com",
         to: email,
-        subject: "Sending Email using Node.js",
-        text:
-          names +
-          " " +
-          "thank you for subscribing to our brand happy to have you!!❤️❤️",
+        subject: "Stay Connected: ATC's Monthly Newsletter",
+        text:body
       };
 
       const info = await transporter.sendMail(mailOptions);

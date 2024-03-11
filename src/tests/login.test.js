@@ -11,7 +11,7 @@ dotenv.config();
 jest.mock('../models/testuserschema.js');
 
 
-describe("Post /api/user", () => {
+describe("Post /user", () => {
   
   test("should have a 400 status and valid error response: email is not valid", async () => {
     const response = await request(app).post("/user").send({
@@ -46,7 +46,7 @@ describe('Login user', () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-  });
+  },10000);
 
   it('should authenticate user and return access token', async () => {
     // Perform your test logic here, including database operations

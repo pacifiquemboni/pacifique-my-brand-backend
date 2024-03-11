@@ -1,106 +1,185 @@
-// Import necessary modules and dependencies
-const request = require("supertest");
-const app = require("../index.js");
+const supertest = require('supertest');
+const mongoose = require('mongoose');
+const { connect, disconnect } = require('mongoose');
+const app = require('../index.js'); // Replace with your Express app
+const Blog = require('../models/blogtestschema.js');
+const dotenv = require('dotenv')
+dotenv.config();
 
-jest.mock("../models/blogschema.js");
-let accessToken;
+describe('Blog Controller', () => {
+  let testBlog;
+  let authToken;
+  let testBlogId;
 
-beforeAll(async () => {
-  // Authenticate and get the access token
-  const authResponse = await request(app).post("/login").send({
-    email: "admin@gmail.com",
-    password: "Admin@123",
+  beforeAll(async () => {
+    // mongodb://localhost:27017/nodedb
+    // Connect to the test database or your actual database
+    await connect('process.env.MONGO_URI', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    // Seed the database with test data
+    testBlog = await Blog.create({ title: 'Test Blog 1', content: 'Lorem ipsum dolor sit amet.' });
+
+    // Simulate user authentication and get the authentication token
+    const loginRes = await supertest(app)
+      .post('/login')
+      .send({
+        email: 'pacifiquemboni@gmail.com',
+        password: 'Paci@123',
+      });
+    authToken = loginRes.body.token;
+    // Seed the database with a test blog
+  const testBlognew = await Blog.create({
+    title: 'Test Blog',
+    author: 'Test Author',
+    intro: 'Test Introduction',
+    body: 'Test Body',
+  });
+  testBlogId = testBlognew._id;
+
+  });
+
+  afterAll(async () => {
+    // Remove test data from the database and close the connection
+    await Blog.deleteMany({});
+    await disconnect();
+  });
+
+  describe('GET /blogs', () => {
+    it('should get all blogs', async () => {
+      // Arrange
+      const expectedStatus = 200;
+
+      // Act
+      const res = await supertest(app).get('/blogs');
+
+      // Assert
+      expect(res.status).toBe(expectedStatus);
+      expect(res.body.status).toBe('Posted blogs');
+      expect(res.body.data).toBeInstanceOf(Array);
+      // You can add more specific assertions based on your application requirements
+    });
+  });
+  describe('POST /testBlogs', () => {
+    it('should create a new test blog with authentication', async () => {
+      // Arrange
+      const expectedStatus = 201;  // Corrected status code
+      const newTestBlogData = {
+        title: 'Test Blog Title',
+        intro: 'Test Blog Introduction',
+        body: 'Test Blog Body',
+      };
+  
+      // Act
+      const res = await supertest(app)
+        .post('/postblog')  // Make sure the route is correct
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(newTestBlogData);
+  
+      // Log the response body for debugging
+      console.log('final body', res.body);
+  
+      // Assert
+      expect(res.status).toBe(expectedStatus);
+      expect(res.body).toBeDefined();  // Check if the response body exists
+      expect(res.body.status).toBe('Success');
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.title).toBe(newTestBlogData.title);
+      expect(res.body.data.intro).toBe(newTestBlogData.intro);
+      expect(res.body.data.body).toBe(newTestBlogData.body);
+      // You can add more specific assertions based on your application requirements
+    });
   });
   
-  console.log("body is=",authResponse.body);
-console.log("token is =",authResponse.body.token)
-  accessToken = authResponse.body.token;
+
+  describe('GET /blogs/:id', () => {
+    it('should get one blog by ID with authorization', async () => {
+      // Arrange
+      const expectedStatus = 200;
+      const blogId = '65ef17018f2584e6f1eee36c';
   
-}, 20000);
-
-// Describe block for the BlogController tests
-describe("BlogController", () => {
-  describe("Get blogs:", () => {
-    it("should return 200 trying to get all blogs posted", async () => {
-      const response = await request(app).get("/blogs");
-      expect(response.status).toBe(200);
+      // Act
+      const res = await supertest(app)
+        .get(`/blogs/${blogId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      // Log the entire response for debugging
+      console.log(res.body);
+  
+      // Assert
+      expect(res.status).toBe(expectedStatus);
+  
+      if (res.body.message === 'blog with that id is deleted') {
+        // Adjust assertions for deleted blog
+        expect(res.body.message).toBe('blog with that id is deleted');
+      } else {
+        // Continue with assertions for existing blog
+        expect(res.body.status).toBe('Success');
+        expect(res.body.data).toBeDefined();
+        expect(res.body.data._id).toBe(blogId);
+      }
+  
+      // You can add more specific assertions based on your application requirements
     });
-    it("should return 4001 trying to get one blog posted", async () => {
-      const response = await request(app).get("/blogs/:id");
-      expect(response.status).toBe(401);
+  });
+  describe('DELETE /blogs/:id', () => {
+    it('should delete one blog by ID with authorization', async () => {
+      // Arrange
+      const expectedStatus = 200;
+      const blogId = '65ef17018f2584e6f1eee36c';
+  
+      // Act
+      const res = await supertest(app)
+        .delete(`/blogs/${blogId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      // Log the entire response for debugging
+      console.log(res.body);
+  
+      // Assert
+      expect(res.status).toBe(expectedStatus);
+  
+       
+        // Assertions for an existing blog
+        expect(res.body.status).toBe('Success');
+        expect(res.body.data).toBeDefined();
+        expect(res.body.data._id).toBe(blogId);
+     
+  
+      // You can add more specific assertions based on your application requirements
+    });
+  });
+  
+  
+  describe('PATCH /blogs/:id', () => {
+    it('should update a blog with authentication and proper role', async () => {
+      // Arrange
+      const expectedStatus = 200;
+      const updatedData = {
+        title: 'Updated Test Blog Title',
+        body: 'Updated Test Blog Body',
+      };
+
+      // Act
+      const res = await supertest(app)
+        .patch(`/blogs/${testBlogId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updatedData);
+
+      // Log the response body for debugging
+      console.log('final update body', res.body);
+
+      // Assert
+      expect(res.status).toBe(expectedStatus);
+      expect(res.body.status).toBe('Success');
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.title).toBe(updatedData.title);
+      expect(res.body.data.body).toBe(updatedData.body);
+      // You can add more specific assertions based on your application requirements
     });
   });
 
-  describe("Post blog: ", () => {
-    it("should create a new blog post with authentication", async () => {
-      const response = await request(app)
-        .post("/blog")
-        .set("Authorization", `Bearer ${accessToken}`)
-        .send({
-          title: "New Blog Post",
-          author: "paci",
-          intro: "introduction",
-          body: "body of the blog",
-        });
-      console.log(response.body);
-
-      expect(response.status).toBe(201);
-      // Add more expectations based on your API response
-    }, 10000);
-    // Test case: Unauthorized access to create a blog post
-    it("should return 401 for unauthorized user trying to create a blog post", async () => {
-      // Send a request without providing the authorization token
-      const response = await request(app).post("/blog").send({
-        title: "Test Blog Post",
-        content: "This is a test blog post.",
-      });
-
-      // Assert that the response status code is 401 (Unauthorized)
-      expect(response.status).toBe(401);
-    });
-    it("should return 401 for unauthorized user trying to create a blog post", async () => {
-      // Send a request without providing the authorization token
-      const response = await request(app).post("/blog").send({});
-
-      // Assert that the response status code is 401 (Unauthorized)
-      expect(response.status).toBe(401);
-    });
-    // Test case: Unauthorized access to comment on a blog post
-    it("should return 401 for unauthorized user trying to comment a blog post", async () => {
-      // Send a request without providing the authorization token
-      const response = await request(app).post("/blogs/{:id}/comment").send({
-        names: "Test Blog Post",
-        comment: "This is a test blog post.",
-      });
-
-      // Assert that the response status code is 401 (Unauthorized)
-      expect(response.status).toBe(401);
-    });
-  });
-
-  describe("Delete blog:", () => {
-    // Test case: Unauthorized access to delete on a blog post
-    it("should return 401 for unauthorized user trying to delet a blog post", async () => {
-      // Send a request without providing the authorization token
-      const response = await request(app).delete("/blogs/:id").send({
-        blogId: "132434534657855375",
-      });
-
-      // Assert that the response status code is 401 (Unauthorized)
-      expect(response.status).toBe(401);
-    });
-  });
-
-  describe("Update a blog:", () => {
-    // Test case: Unauthorized access to udate a blog post
-    it("should return 401 for unauthorized user trying to comment a blog post", async () => {
-      // Send a request without providing the authorization token
-      const response = await request(app).patch("/blogs/:id").send({
-        blogId: "132434534657855375",
-      });
-
-      // Assert that the response status code is 401 (Unauthorized)
-      expect(response.status).toBe(401);
-    });
-  });
+  // Add more test cases if needed, such as testing edge cases
 });

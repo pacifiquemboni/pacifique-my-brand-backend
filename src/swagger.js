@@ -15,7 +15,7 @@ const swaggerOptions = {
         url: "http://localhost:5000", // Local development server URL
       },
       {
-        url: "http://pacifique-mybrand-endpoints.onrender.com", // Render production server URL
+        url: "https://pacifique-mybrand-endpoints.onrender.com", // Render production server URL
       },
     ],
     components: {

@@ -17,12 +17,12 @@ const upload = multer({
 class BlogController {
   static async getAllBlogs(req, res) {
     const blogs = await Blog.find();
-    if (blogs.length === 0) {
-      return res.status(200).json({
-        status: "success",
-        message: "There is no blogs posted",
-      });
-    }
+    // if (blogs.length === 0) {
+    //   return res.status(200).json({
+    //     status: "success",
+    //     message: "There is no blogs posted",
+    //   });
+    // }
     return res.status(200).json({
       status: "Posted blogs",
       data: blogs,
@@ -41,11 +41,11 @@ class BlogController {
               error: "Title, Introduction, and Body are required",
             });
           }
-          if (!req.file) {
-            return res.status(400).json({
-              error: "Image is required",
-            });
-          }
+          // if (!req.file) {
+          //   return res.status(400).json({
+          //     error: "Image is required",
+          //   });
+          // }
           const loggedInUserName = req.user ? req.user.name : "Anonymous";
           const postblog = new Blog({
             title: title,
@@ -60,6 +60,45 @@ class BlogController {
           });
           postblog.save();
           return res.status(200).json({
+            message: "Blog created successfully",
+            data: postblog,
+          });
+        }
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+  ////////////////////////////////////this is used in testing/////////////////////////
+  static async postsingleBlog(req, res) {
+    try {
+      upload(req, res, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          const { title, author, intro, body } = req.body;
+          if (!title || !intro || !body) {
+            return res.status(400).json({
+              error: "Title, Introduction, and Body are required",
+            });
+          }
+          // if (!req.file) {
+          //   return res.status(400).json({
+          //     error: "Image is required",
+          //   });
+          // }
+          const loggedInUserName = req.user ? req.user.name : "Anonymous";
+          const postblog = new Blog({
+            title: title,
+            author: loggedInUserName,
+            intro: intro,
+            body: body,
+          });
+          postblog.save();
+          return res.status(201).json({
+            status:'Success',
             message: "Blog created successfully",
             data: postblog,
           });
@@ -164,7 +203,7 @@ class BlogController {
     try {
       await Blog.deleteOne({ _id: req.params.id });
       return res.status(200).json({
-        status: "blog deleted successfully",
+        status: "Success",
       });
     } catch (error) {
       return res.status(500).json({

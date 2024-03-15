@@ -2,68 +2,21 @@ const Blog = require("../models/blogschema.js");
 
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const multer = require("multer");
 
-const Storage = multer.diskStorage({
-  destination: "uploads",
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({
-  storage: Storage,
-}).single("blogImage");
 
 class BlogController {
   static async getAllBlogs(req, res) {
-    const blogs = await Blog.find();
-    // if (blogs.length === 0) {
-    //   return res.status(200).json({
-    //     status: "success",
-    //     message: "There is no blogs posted",
-    //   });
-    // }
-    return res.status(200).json({
-      status: "Posted blogs",
-      data: blogs,
-    });
-  }
- 
-  static async postOneBlog(req, res) {
     try {
-      upload(req, res, (err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          const { title, author, intro, body } = req.body;
-          if (!title || !intro || !body) {
-            return res.status(400).json({
-              error: "Title, Introduction, and Body are required",
-            });
-          }
-          // if (!req.file) {
-          //   return res.status(400).json({
-          //     error: "Image is required",
-          //   });
-          // }
-          const loggedInUserName = req.user ? req.user.name : "Anonymous";
-          const postblog = new Blog({
-            title: title,
-            author: loggedInUserName,
-            intro: intro,
-            body: body,
-
-            image: {
-              data: req.file.filename,
-              contentType: "image/png",
-            },
-          });
-          postblog.save();
-          return res.status(200).json({
-            message: "Blog created successfully",
-            data: postblog,
-          });
-        }
+      const blogs = await Blog.find();
+      if (blogs.length === 0) {
+        return res.status(200).json({
+          status: "success",
+          message: "There is no blogs posted",
+        });
+      }
+      return res.status(200).json({
+        status: "Posted blogs",
+        data: blogs,
       });
     } catch (error) {
       return res.status(500).json({
@@ -71,6 +24,66 @@ class BlogController {
       });
     }
   }
+
+  // Your controller
+  static async postOneBlog(req, res) {
+    try {
+      const { title, author, intro, body, image } = req.body;
+      const blogExist = await Blog.findOne({ title: title });
+      if (blogExist) {
+        return res.status(400).json({
+          message: "Blog with that title arleady posted",
+        });
+      }
+  
+      // Check if required fields are present
+      if (!title) {
+        return res.status(400).json({
+          error: "Title is required",
+        });
+      }
+      if (!intro) {
+        return res.status(400).json({
+          error: "intro is required",
+        });
+      }
+      if (!body) {
+        return res.status(400).json({
+          error: "body is required",
+        });
+      }
+      if (!image) {
+        return res.status(400).json({
+          error: "Image is required",
+        });
+      }
+      
+  
+      const loggedInUserName = req.user ? req.user.name : "Anonymous";
+  
+      // Create a new Blog instance
+      const postblog = new Blog({
+        title: title,
+        author: loggedInUserName,
+        intro: intro,
+        body: body,
+        image: image,
+      });
+  
+      // Save the new blog to the database
+      await postblog.save();
+  
+      return res.status(201).json({
+        message: "Blog created successfully",
+        data: postblog,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+  
   ////////////////////////////////////this is used in testing/////////////////////////
   static async postsingleBlog(req, res) {
     try {
@@ -98,7 +111,7 @@ class BlogController {
           });
           postblog.save();
           return res.status(201).json({
-            status:'Success',
+            status: "Success",
             message: "Blog created successfully",
             data: postblog,
           });
@@ -113,7 +126,7 @@ class BlogController {
   //add comment
   static async commentOnBlog(req, res) {
     try {
-      const { names, comment } = req.body;
+      const { names,email, comment } = req.body;
       const blogId = req.params.id;
       if (!blogId) {
         return res.status(400).json({
@@ -149,6 +162,26 @@ class BlogController {
       });
     }
   }
+  //get all comment
+  static async getAllComments(req, res){
+    try {
+      const comments = await Blog.find();
+      if (comments.length === 0) {
+        return res.status(200).json({
+          status: "success",
+          message: "There is no comment",
+        });
+      }
+      return res.status(200).json({
+        status: "added comments",
+        data: comments,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
 
   //get single blog
   static async getOneBlog(req, res) {
@@ -173,7 +206,7 @@ class BlogController {
   static async updateOneBlog(req, res) {
     try {
       const singleBlog = await Blog.findOne({ _id: req.params.id });
-      const { title, author, intro, body } = req.body;
+      const { title, author, intro, body, image } = req.body;
       if (title) {
         singleBlog.title = title;
       }
@@ -182,6 +215,9 @@ class BlogController {
       }
       if (body) {
         singleBlog.body = body;
+      }
+      if (image) {
+        singleBlog.image = image;
       }
       const updateBlog = await Blog.findOneAndUpdate(
         { _id: req.params.id },

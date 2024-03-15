@@ -46,8 +46,8 @@ signupRouter.use(express.json());
 
 signupRouter.get(
   "/users",
-  // authMiddleware.isAuthenticated,
-  // authMiddleware.checkRole,
+  authMiddleware.isAuthenticated,
+  authMiddleware.checkRole,
   signController.getAllSignUpUsers
 );
 //register a user

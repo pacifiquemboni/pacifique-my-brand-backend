@@ -1,35 +1,32 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 // const author = 'Pacifique Mbonimana';
 const blogSchema = mongoose.Schema({
-  title:{
-    type: String
+  title: {
+    type: String,
   },
-  author:{
-    type: String
+  author: {
+    type: String,
   },
-  intro:{
-    type: String
+  intro: {
+    type: String,
   },
-  body:{
-    type: String
+  body: {
+    type: String,
   },
   image: {
-    data: Buffer,
-    contentType: String,
+    type: String,
   },
-  comments:[
+  comments: [
     {
-      names:String,
-      timeadded:{
-        type: Date
+      names: String,
+      timeadded: {
+        type: Date,
       },
-      comment:String
+      comment: String,
     },
   ],
-})
+});
 
-
-
-module.exports = mongoose.model("Blog",blogSchema)
+module.exports = mongoose.model("Blog", blogSchema);
 // module.exports = mongoose.model("Comment",commentSchema)

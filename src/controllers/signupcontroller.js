@@ -112,6 +112,9 @@ class userSignupController {
       if (names) {
         singleUser.names = names;
       }
+      if (email) {
+        singleUser.email = email;
+      }
 
       if (password) {
         const hashPassword = bcrypt.hashSync(password, 10);

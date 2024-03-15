@@ -54,7 +54,6 @@ router.use(express.json());
 // authMiddleware.isAuthenticated,authMiddleware.checkRole,
 
 router.get("/blogs", BlogController.getAllBlogs);
-
 /**
  * @swagger
  * tags:
@@ -69,12 +68,10 @@ router.get("/blogs", BlogController.getAllBlogs);
  *       - "Blogs"
  *     security:
  *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -90,10 +87,10 @@ router.get("/blogs", BlogController.getAllBlogs);
  *               body:
  *                 type: string
  *                 description: The main content of the blog.
- *               blogImage:
+ *               image:  
  *                 type: string
- *                 format: binary
- *                 description: Binary image data.
+ *                 format: uri
+ *                 description: URL of the image.
  *     responses:
  *       201:
  *         description: Blog created successfully.
@@ -106,6 +103,7 @@ router.get("/blogs", BlogController.getAllBlogs);
  *       500:
  *         description: Internal server error.
  */
+
 
 //post a blog
 router.post(
@@ -358,6 +356,12 @@ router.delete(
 
 router.post(
   "/blogs/:id/comment",
+  authMiddleware.isAuthenticated,
+  BlogController.commentOnBlog
+);
+
+router.get(
+  "/blogs/:id/comments",
   authMiddleware.isAuthenticated,
   BlogController.commentOnBlog
 );

@@ -1,15 +1,6 @@
 const Portfolio = require("../models/portfolioschema");
 const multer = require("multer");
 
-const Storage = multer.diskStorage({
-  destination: "uploads",
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({
-  storage: Storage,
-}).single("portfolioImage");
 
 class portfolioController {
   //get all projects
@@ -23,43 +14,43 @@ class portfolioController {
 
   static async creatPortifolio(req, res) {
     try {
-      upload(req, res, (err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          const newPortfolio = new Portfolio({
-            name: req.body.name,
-            description: req.body.description,
-            image: {
-              data: req.file.filename,
-              contentType: "image/png",
-            },
-          });
-          newPortfolio.save();
-          return res.status(200).json({
-            message: "Portfolio created successfully",
-            data: newPortfolio,
-          });
-        }
+      const newPortfolio = new Portfolio({
+        name: req.body.name,
+        description: req.body.description,
+        started: req.body.started,
+        ended: req.body.ended,
+        image: req.body.image,
+      });
+      await newPortfolio.save();
+      return res.status(200).json({
+        message: "Portfolio created successfully",
+        data: newPortfolio,
       });
     } catch (error) {
       return res.status(500).json({
         message: error.message,
       });
     }
-  }
+}
+
   // Update an existing portfolio
 
   static async updateOneProj(req, res) {
     try {
       const singleProj = await Portfolio.findOne({ _id: req.params.id });
-      const { name, description } = req.body;
+      const { name, description, started,ended } = req.body;
       if (name) {
         singleProj.name = name;
       }
 
       if (description) {
         singleProj.description = description;
+      }
+      if (started) {
+        singleProj.started = started;
+      }
+      if (ended) {
+        singleProj.ended = ended;
       }
 
       const updatePortfolio = await Portfolio.findOneAndUpdate(

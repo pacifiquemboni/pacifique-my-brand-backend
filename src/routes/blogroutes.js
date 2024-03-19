@@ -166,7 +166,7 @@ router.post(
 
 router.get(
   "/blogs/:id",
-  authMiddleware.isAuthenticated,
+  
   BlogController.getOneBlog
 );
 

@@ -7,6 +7,8 @@ const signupRouter = require("./routes/usersignuproutes.js");
 const messageRouter = require("./routes/messageroutes.js");
 const portfolioRouter = require("./routes/portfolioroutes.js");
 const uploadRoute = require('./controllers/routeuploads.js')
+const commentrouter = require('./routes/commentroutes.js')
+const likesrouter = require('./routes/likesroutes.js')
 const path = require('path');
 const multer = require("multer");
 // const swaggerJSDoc = require("swagger-jsdoc");
@@ -25,6 +27,8 @@ app.use("/", signupRouter);
 app.use("/", messageRouter);
 app.use("/", portfolioRouter);
 app.use('/api/upload', uploadRoute)
+app.use('/', commentrouter)
+app.use('/', likesrouter)
 // Serve static files from the 'uploads' directory
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

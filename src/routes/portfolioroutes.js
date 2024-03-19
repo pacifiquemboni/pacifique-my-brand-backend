@@ -49,21 +49,20 @@ portfolioRouter.get("/projects", portfolioController.getAllProjects);
 /**
  * @swagger
  * tags:
- *   - name: "Projects"
- *     description: "Endpoints for managing projects"
- *
+ *   - name: Projects
+ *     description: Endpoints for managing projects
  * /project:
  *   post:
  *     summary: Post a project
  *     description: Create a new project by providing project details and uploading an image.
  *     tags:
- *       - "Projects"
+ *       - Projects
  *     security:
  *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -73,46 +72,55 @@ portfolioRouter.get("/projects", portfolioController.getAllProjects);
  *               description:
  *                 type: string
  *                 description: The description of the project.
- *               portfolioImage:
+ *               started:
  *                 type: string
- *                 format: binary
- *                 description: The image file to upload.
+ *                 format: date-time
+ *                 description: The start date of the project.
+ *               ended:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The end date of the project.
+ *               image:
+ *                 type: string
+ *                 description: The image URL of the project.
  *             required:
  *               - name
  *               - description
- *               - portfolioImage
+ *               - started
+ *               - image
  *     responses:
  *       200:
  *         description: Successfully created a new project.
  *         content:
  *           application/json:
  *             example:
- *               message: "Project created successfully."
+ *               message: Project created successfully.
  *       400:
  *         description: Bad request. Invalid or missing parameters in the request.
  *         content:
  *           application/json:
  *             example:
- *               error: "Invalid or missing parameters."
+ *               error: Invalid or missing parameters.
  *       401:
  *         description: Unauthorized. User not authenticated.
  *         content:
  *           application/json:
  *             example:
- *               error: "Unauthorized. User not authenticated."
+ *               error: Unauthorized. User not authenticated.
  *       403:
  *         description: Forbidden. User lacks necessary permissions.
  *         content:
  *           application/json:
  *             example:
- *               error: "Forbidden. User lacks necessary permissions."
+ *               error: Forbidden. User lacks necessary permissions.
  *       500:
  *         description: Internal server error.
  *         content:
  *           application/json:
  *             example:
- *               error: "Internal server error."
+ *               error: Internal server error.
  */
+
 
 portfolioRouter.post(
   "/project",

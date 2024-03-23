@@ -1,3 +1,4 @@
+const comment = require('../models/comment.js');
 const comments = require('../models/comment.js')
 
 const mongoose = require('mongoose');
@@ -33,6 +34,20 @@ class CommentController{
        return res.status(201).json({
         message: "comment created successfully",
         data: postcomment,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+  static async getAllComment(req,res){
+    try {
+      const allcomments = await comments.find();
+      
+      return res.status(200).json({
+        status: "Posted comments",
+        data: allcomments,
       });
     } catch (error) {
       return res.status(500).json({

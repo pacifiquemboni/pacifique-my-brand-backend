@@ -7,6 +7,7 @@ const CommentController = require("../controllers/commentscontroller.js");
 
 commentrouter.use(express.json());
 
+commentrouter.get('/comments', CommentController.getAllComment)
 // post comment
 
 commentrouter.post("/comment", CommentController.postOneComment);
@@ -25,5 +26,6 @@ commentrouter.get('/comments/:id',authMiddleware.isAuthenticated,async (req, res
     res.status(500).json({ success: false, error: 'Error fetching comments' });
   }
 });
+
 
 module.exports = commentrouter;

@@ -192,7 +192,8 @@ class userSignupController {
       console.log("Generated Token:", token);
       return res.status(200).json({
         token: token,
-        role: userExist.role
+        role: userExist.role,
+        
       });
     } catch (error) {
       return res.status(500).json({

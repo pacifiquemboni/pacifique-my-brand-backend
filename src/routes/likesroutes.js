@@ -20,26 +20,32 @@ likesrouter.get("/likes/:id", async (req, res) => {
 
 likesrouter.post("/like", async (req, res) => {
   try {
-    const { blogId, isLiked } = req.body;
+    const { blogId } = req.body;
 
-    if (!isLiked) {
-      // If isLiked is false, remove the document from the database
-      await BlogLike.findOneAndDelete({ blogId: blogId });
-      return res.json({ message: "Like removed successfully" });
+    if (!blogId) {
+      return res.status(400).json({ error: "Missing 'blogId' in request body." });
     }
 
     let blogLike = await BlogLike.findOne({ blogId: blogId });
 
     if (!blogLike) {
-      // If blogLike doesn't exist, create a new one
-      blogLike = new BlogLike({ blogId: blogId });
+      // If blogLike doesn't exist, create a new one and set likes count to 1
+      blogLike = new BlogLike({ blogId: blogId, likes: 1 });
+      await blogLike.save();
+      return res.json({ message: "Like added successfully" });
     }
 
-    // Update likes count based on isLiked value
-    blogLike.likes = 1;
-
-    await blogLike.save();
-    res.json({ message: "Like status updated successfully" });
+    // If blogLike exists, toggle like status
+    if (blogLike.likes === 1) {
+      // If the post is already liked, remove the like
+      await BlogLike.findOneAndDelete({ blogId: blogId });
+      return res.json({ message: "Like removed successfully" });
+    } else {
+      // If the post is not liked, add the like
+      blogLike.likes = 1;
+      await blogLike.save();
+      return res.json({ message: "Like added successfully" });
+    }
   } catch (error) {
     console.error("Error updating likes:", error);
     res.status(500).json({ error: "Internal server error" });

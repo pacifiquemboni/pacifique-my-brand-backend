@@ -1,13 +1,19 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const date = require('date-and-time') 
 
+const now  =  new Date();
+// const formatteddate =
 const commentSchema = mongoose.Schema({
-  blogid:String,
+  blogid: String,
   names: String,
-  comment:String,
-  dateadded:{
+  comment: String,
+  dateadded: {
     type: Date,
-    default: Date.now()
+    default: Date.now
   }
-})
+});
 
-module.exports = mongoose.model("Comments", commentSchema);
+// Define a virtual property to format the date as "dd/mm/yy"
+
+
+module.exports = mongoose.model("Comment", commentSchema);

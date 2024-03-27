@@ -1,37 +1,36 @@
-const comment = require('../models/comment.js');
-const comments = require('../models/comment.js')
+const comment = require("../models/comment.js");
+const comments = require("../models/comment.js");
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-
-class CommentController{
-  static async postOneComment(req, res){
+class CommentController {
+  static async postOneComment(req, res) {
     try {
-      const {blogid, names, comment} = req.body;
-      if(!blogid){
+      const { blogid, names, comment } = req.body;
+      if (!blogid) {
         return res.status(400).json({
           error: "blog Id not Found",
         });
       }
-      if(!names){
+      if (!names) {
         return res.status(400).json({
           error: "name is required",
         });
       }
-      if(!comment){
+      if (!comment) {
         return res.status(400).json({
           error: "comment is required",
         });
       }
       // const loggedInUserName = req.user ? req.user.name : "Anonymous";
-       const postcomment = new comments({
+      const postcomment = new comments({
         blogid: blogid,
         names: names,
-        comment:comment
-       })
+        comment: comment,
+      });
 
-       await postcomment.save();
-       return res.status(201).json({
+      await postcomment.save();
+      return res.status(201).json({
         message: "comment created successfully",
         data: postcomment,
       });
@@ -41,10 +40,10 @@ class CommentController{
       });
     }
   }
-  static async getAllComment(req,res){
+  static async getAllComment(req, res) {
     try {
       const allcomments = await comments.find();
-      
+
       return res.status(200).json({
         status: "Posted comments",
         data: allcomments,
@@ -55,7 +54,6 @@ class CommentController{
       });
     }
   }
-
 }
 
 module.exports = CommentController;
